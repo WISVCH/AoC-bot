@@ -1,0 +1,22 @@
+[package]
+name = "JollyFellow"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.25.1", default-features = false, features = ["rt","rt-multi-thread", "macros"] } # for async in general
+futures-util = { version = "0.3.13", default-features = false } # for async in general
+poise_macros = "0.6.1"  # remember to update the version on changes!
+async-trait = { version = "0.1.48", default-features = false } # various traits
+regex = { version = "1.6.0", default-features = false, features = ["std"] } # prefix
+tracing = { version = "0.1.40", features = ["log"] } # warning about weird state
+derivative = "2.2.0"
+parking_lot = "0.12.1"
+trim-in-place = "0.1.7"
+indexmap = "2.2.6"
+poise = "0.6.1"
+reqwest = { version = "0.12.9", features = ["json"] }
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0"
+demoji-rs = "0.1.0"
+tokio-cron= "0.1.3"
