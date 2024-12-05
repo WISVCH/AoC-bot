@@ -1,7 +1,6 @@
 use demoji_rs::remove_emoji;
 use poise::serenity_prelude as serenity;
 use serde::Deserialize;
-use tokio_cron::{Scheduler, Job, daily};
 
 struct Data {} // User data, which is stored and accessible in all command invocations
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -30,7 +29,6 @@ pub struct AochData {
     pub total: Vec<TotalEntry>,
 }
 
-
 fn truncate(s: &str, max_chars: usize) -> &str {
     match s.char_indices().nth(max_chars) {
         None => s,
@@ -40,38 +38,64 @@ fn truncate(s: &str, max_chars: usize) -> &str {
 
 async fn get_leaderboard_data() -> AochData {
     let response_data = reqwest::get("https://aoch.wisv.ch/data")
-        .await.unwrap()
-        .json().await.unwrap();
+        .await
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
     response_data
 }
 
 /// Displays your or another user's account creation date
 #[poise::command(slash_command, prefix_command)]
-async fn leaderboard_total(
-    ctx: Context<'_>
-) -> Result<(), Error> {
+async fn leaderboard_total(ctx: Context<'_>) -> Result<(), Error> {
     let aoch_data = get_leaderboard_data().await;
 
-    let start_width: usize = aoch_data.total.iter().map(|x| {x.name.clone().unwrap_or_else(|| ANON_USER.to_string()).len()}).max().unwrap();
-    let max_stars: usize = aoch_data.total.iter().map(|x| {x.stars.clone().iter().sum::<i32>()}).max().unwrap() as usize;
-    let row_size: usize=  start_width+11+max_stars;
-    let row_count = 1900/row_size;
+    let start_width: usize = aoch_data
+        .total
+        .iter()
+        .map(|x| {
+            x.name
+                .clone()
+                .unwrap_or_else(|| ANON_USER.to_string())
+                .len()
+        })
+        .max()
+        .unwrap();
+    let max_stars: usize = aoch_data
+        .total
+        .iter()
+        .map(|x| x.stars.clone().iter().sum::<i32>())
+        .max()
+        .unwrap() as usize;
+    let row_size: usize = start_width + 11 + max_stars;
+    let row_count = 1900 / row_size;
 
     let mut table_rows = vec![];
-    table_rows.push(format!("{1:0$} | {2:5} | {3:5}",start_width ,"Name" ,"Score" ,"Stars"));
+    table_rows.push(format!(
+        "{1:0$} | {2:5} | {3:5}",
+        start_width, "Name", "Score", "Stars"
+    ));
     table_rows.push(format!("{:-^row_size$}", ""));
 
-    table_rows.append(aoch_data.total.into_iter().map(|x| {
-        let name: String = remove_emoji(&x.name.unwrap_or_else(|| ANON_USER.to_string()));
+    table_rows.append(
+        aoch_data
+            .total
+            .into_iter()
+            .map(|x| {
+                let name: String = remove_emoji(&x.name.unwrap_or_else(|| ANON_USER.to_string()));
 
-        let star_count = x.stars.iter().sum();
-        let mut stars: String = String::new();
-        for _ in 0..star_count {
-            stars += "*";
-        }
+                let star_count = x.stars.iter().sum();
+                let mut stars: String = String::new();
+                for _ in 0..star_count {
+                    stars += "*";
+                }
 
-        format!("{name:0$} | {1:5} | {stars} ",start_width ,x.score)
-    }).collect::<Vec<String>>().as_mut());
+                format!("{name:0$} | {1:5} | {stars} ", start_width, x.score)
+            })
+            .collect::<Vec<String>>()
+            .as_mut(),
+    );
 
     let mut stylized_answer = table_rows[0..row_count].join("\n");
     stylized_answer = format!("```\n{}```", truncate(&*stylized_answer, 1990));
@@ -82,40 +106,56 @@ async fn leaderboard_total(
 
 /// Displays the leaderboard of today.
 #[poise::command(slash_command, prefix_command)]
-async fn leaderboard_today(
-    ctx: Context<'_>
-) -> Result<(), Error> {
+async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
     let aoch_data = get_leaderboard_data().await;
 
-    let start_width = aoch_data.today.iter().map(|x| {x.name.clone().unwrap_or_else(|| ANON_USER.to_string()).len()}).max().unwrap();
-    let row_size: usize=  start_width+16;
-    let row_count = 1900/row_size;
+    let start_width = aoch_data
+        .today
+        .iter()
+        .map(|x| {
+            x.name
+                .clone()
+                .unwrap_or_else(|| ANON_USER.to_string())
+                .len()
+        })
+        .max()
+        .unwrap();
+    let row_size: usize = start_width + 16;
+    let row_count = 1900 / row_size;
 
     let mut table_rows = vec![];
-    table_rows.push(format!("{1:0$} | {2:5} | {3:5}",start_width ,"Name" ,"Stars" ,"Score"));
+    table_rows.push(format!(
+        "{1:0$} | {2:5} | {3:5}",
+        start_width, "Name", "Stars", "Score"
+    ));
     table_rows.push(format!("{:-^row_size$}", ""));
 
-    table_rows.append(aoch_data.today.into_iter().map(|x| {
-        let name: String = remove_emoji(&x.name.unwrap_or_else(|| ANON_USER.to_string()));
+    table_rows.append(
+        aoch_data
+            .today
+            .into_iter()
+            .map(|x| {
+                let name: String = remove_emoji(&x.name.unwrap_or_else(|| ANON_USER.to_string()));
 
-        let mut stars: String = String::new();
-        if x.star1.is_some(){
-            stars += "*";
-        }
-        if x.star2.is_some() {
-            stars += "*";
-        }
+                let mut stars: String = String::new();
+                if x.star1.is_some() {
+                    stars += "*";
+                }
+                if x.star2.is_some() {
+                    stars += "*";
+                }
 
-        format!("{name:0$} | {stars:^5} | {1:<5}",start_width ,x.score)
-    }).collect::<Vec<String>>().as_mut());
-
+                format!("{name:0$} | {stars:^5} | {1:<5}", start_width, x.score)
+            })
+            .collect::<Vec<String>>()
+            .as_mut(),
+    );
 
     let mut stylized_answer = table_rows[0..row_count].join("\n");
     stylized_answer = format!("```\n{}```", truncate(&*stylized_answer, 1990));
     println!("{}", stylized_answer);
     ctx.say(stylized_answer).await?;
     Ok(())
-
 }
 
 #[tokio::main]
@@ -140,5 +180,4 @@ async fn main() {
         .framework(framework)
         .await;
     client.unwrap().start().await.unwrap();
-
 }
