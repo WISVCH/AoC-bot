@@ -52,24 +52,28 @@ async fn leaderboard_total(
 ) -> Result<(), Error> {
     let aoch_data = get_leaderboard_data().await;
 
-
     let start_width: usize = aoch_data.total.iter().map(|x| {x.name.clone().unwrap_or_else(|| ANON_USER.to_string()).len()}).max().unwrap();
     let max_stars: usize = aoch_data.total.iter().map(|x| {x.stars.clone().iter().sum::<i32>()}).max().unwrap() as usize;
+    let row_size: usize=  start_width+11+max_stars;
+    let row_count = 1900/row_size;
 
-    let mut l= aoch_data.total.into_iter().map(|x| {
+    let mut table_rows = vec![];
+    table_rows.push(format!("{1:0$} | {2:5} | {3:5}",start_width ,"Name" ,"Score" ,"Stars"));
+    table_rows.push(format!("{:-^row_size$}", ""));
+
+    table_rows.append(aoch_data.total.into_iter().map(|x| {
         let name: String = remove_emoji(&x.name.unwrap_or_else(|| ANON_USER.to_string()));
+
         let star_count = x.stars.iter().sum();
         let mut stars: String = String::new();
         for _ in 0..star_count {
             stars += "*";
         }
-        let mut width = start_width;
-        format!("{name:0$} | {1:5} | {stars} ",width ,x.score)
-    }).collect::<Vec<String>>();
 
-    let row_size: usize=  start_width+11+max_stars;
-    let row_count = 1900/row_size;
-    let mut stylized_answer = l[0..row_count].join("\n");
+        format!("{name:0$} | {1:5} | {stars} ",start_width ,x.score)
+    }).collect::<Vec<String>>().as_mut());
+
+    let mut stylized_answer = table_rows[0..row_count].join("\n");
     stylized_answer = format!("```\n{}```", truncate(&*stylized_answer, 1990));
 
     ctx.say(stylized_answer).await?;
@@ -81,15 +85,19 @@ async fn leaderboard_total(
 async fn leaderboard_today(
     ctx: Context<'_>
 ) -> Result<(), Error> {
-    let resp = reqwest::get("https://aoch.wisv.ch/data").await?.text().await?;
-    let p: AochData = serde_json::from_str(&*resp).unwrap();
+    let aoch_data = get_leaderboard_data().await;
 
-    let ANON_USER: &str = "Anon";
-    let start_width = p.today.iter().map(|x| {x.name.clone().unwrap_or_else(|| ANON_USER.to_string()).len()}).max().unwrap();
+    let start_width = aoch_data.today.iter().map(|x| {x.name.clone().unwrap_or_else(|| ANON_USER.to_string()).len()}).max().unwrap();
+    let row_size: usize=  start_width+16;
+    let row_count = 1900/row_size;
 
-    let l= p.today.into_iter().map(|x| {
+    let mut table_rows = vec![];
+    table_rows.push(format!("{1:0$} | {2:5} | {3:5}",start_width ,"Name" ,"Stars" ,"Score"));
+    table_rows.push(format!("{:-^row_size$}", ""));
+
+    table_rows.append(aoch_data.today.into_iter().map(|x| {
         let name: String = remove_emoji(&x.name.unwrap_or_else(|| ANON_USER.to_string()));
-        let mut width = start_width;
+
         let mut stars: String = String::new();
         if x.star1.is_some(){
             stars += "*";
@@ -97,11 +105,12 @@ async fn leaderboard_today(
         if x.star2.is_some() {
             stars += "*";
         }
-        format!("{name:0$} | {stars:2} | {1:5}",width ,x.score)
-    }).collect::<Vec<String>>();
-    let row_size: usize=  start_width+13;
-    let row_count = 1900/row_size;
-    let mut stylized_answer = l[0..row_count].join("\n");
+
+        format!("{name:0$} | {stars:^5} | {1:<5}",start_width ,x.score)
+    }).collect::<Vec<String>>().as_mut());
+
+
+    let mut stylized_answer = table_rows[0..row_count].join("\n");
     stylized_answer = format!("```\n{}```", truncate(&*stylized_answer, 1990));
     println!("{}", stylized_answer);
     ctx.say(stylized_answer).await?;
