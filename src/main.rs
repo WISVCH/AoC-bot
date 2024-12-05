@@ -46,7 +46,7 @@ async fn get_leaderboard_data() -> AochData {
     response_data
 }
 
-/// Displays your or another user's account creation date
+/// Displays the overall leaderboard of this year
 #[poise::command(slash_command, prefix_command)]
 async fn leaderboard_total(ctx: Context<'_>) -> Result<(), Error> {
     let aoch_data = get_leaderboard_data().await;
