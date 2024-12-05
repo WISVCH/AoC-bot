@@ -3,7 +3,7 @@ FROM rust:latest AS builder
 WORKDIR /usr/src/JollyFellow
 COPY . .
 RUN cargo build --release
-RUN mv ./target/release/JollyFellow .
+RUN mv ./target/release/JollyFellow /usr/src/JollyFellow
 
 FROM rust:1-alpine3.20
 
