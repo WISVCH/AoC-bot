@@ -158,7 +158,7 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() {
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN environment variable");
     let intents = serenity::GatewayIntents::non_privileged();

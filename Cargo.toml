@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1.25.1", default-features = false, features = ["rt","rt-multi-thread", "macros"] } # for async in general
+tokio = { version = "1.25.1", default-features = false, features = ["rt", "macros"] } # for async in general
 futures-util = { version = "0.3.13", default-features = false } # for async in general
 poise_macros = "0.6.1"  # remember to update the version on changes!
 async-trait = { version = "0.1.48", default-features = false } # various traits

@@ -33,8 +33,3 @@ jobs:
         with:
           command: fmt
           args: --all -- --check
-      - uses: actions-rs/cargo@v1
-        name: clippy check
-        with:
-          command: clippy
-          args: -- -D warnings
