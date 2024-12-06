@@ -97,7 +97,7 @@ async fn leaderboard_total(ctx: Context<'_>) -> Result<(), Error> {
             .as_mut(),
     );
 
-    let mut stylized_answer = table_rows[0..row_count].join("\n");
+    let mut stylized_answer = table_rows[0..cmp::min(row_count, table_rows.len())].join("\n");
     stylized_answer = format!("```\n{}```", truncate(&*stylized_answer, 1990));
 
     ctx.say(stylized_answer).await?;
@@ -151,7 +151,7 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
             .as_mut(),
     );
 
-    let mut stylized_answer = table_rows[0..row_count].join("\n");
+    let mut stylized_answer = table_rows[0..cmp::min(row_count, table_rows.len())].join("\n");
     stylized_answer = format!("```\n{}```", truncate(&*stylized_answer, 1990));
     println!("{}", stylized_answer);
     ctx.say(stylized_answer).await?;
