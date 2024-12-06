@@ -1,13 +1,14 @@
-FROM rust:latest AS builder
+FROM rust:alpine AS builder
 
 WORKDIR /app
+RUN apk update && apk upgrade
+RUN apk add libc-dev openssl-dev openssl-libs-static
 COPY ./Cargo.toml ./Cargo.lock ./
 COPY ./src ./src
 RUN cargo build --release
-RUN mv ./target/release/JollyFellow ./app
 
-FROM rust:1-alpine3.20
+FROM alpine
 
 WORKDIR /app
-COPY --from=builder /app/app /usr/local/bin/
-CMD ["/usr/local/bin/app"]
+COPY --from=builder /app/target/release/JollyFellow /usr/local/bin/jollyfellow
+CMD ["jollyfellow"]
