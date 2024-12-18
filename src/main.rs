@@ -147,7 +147,12 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
                     stars += "*";
                 }
 
-                format!("{2:>5} | {name:0$} | {stars:^5} | {1:>5}", start_width, x.score, i+1)
+                format!(
+                    "{2:>4}) | {name:0$} | {stars:<5} | {1:>5}",
+                     start_width,
+                     x.score,
+                     i + 1
+                 )
             })
             .collect::<Vec<String>>()
             .as_mut(),
