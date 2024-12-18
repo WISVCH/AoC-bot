@@ -148,9 +148,7 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
 
                 format!(
                     "{2:>4}) | {name:0$} | {stars:<5} | {1:>5}",
-                    start_width,
-                    x.score,
-                    x.rank
+                    start_width, x.score, x.rank
                 )
             })
             .collect::<Vec<String>>()
