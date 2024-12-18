@@ -126,8 +126,8 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
 
     let mut table_rows = vec![];
     table_rows.push(format!(
-        "{1:0$} | {2:5} | {3:5}",
-        start_width, "Name", "Stars", "Score"
+        "{4:5} | {1:0$} | {2:5} | {3:5}",
+        start_width, "Name", "Stars", "Score", "Rank"
     ));
     table_rows.push(format!("{:-^row_size$}", ""));
 
@@ -135,7 +135,8 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
         aoch_data
             .today
             .into_iter()
-            .map(|x| {
+            .enumerate()
+            .map(|i, x| {
                 let name: String = remove_emoji(&x.name.unwrap_or_else(|| ANON_USER.to_string()));
 
                 let mut stars: String = String::new();
@@ -146,7 +147,7 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
                     stars += "*";
                 }
 
-                format!("{name:0$} | {stars:^5} | {1:<5}", start_width, x.score)
+                format!("{2:>5} | {name:0$} | {stars:^5} | {1:>5}", start_width, x.score, i+1)
             })
             .collect::<Vec<String>>()
             .as_mut(),
