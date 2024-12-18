@@ -1,7 +1,7 @@
-use std::cmp;
 use demoji_rs::remove_emoji;
 use poise::serenity_prelude as serenity;
 use serde::Deserialize;
+use std::cmp;
 
 struct Data {} // User data, which is stored and accessible in all command invocations
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -121,7 +121,7 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
         })
         .max()
         .unwrap();
-    let row_size: usize = start_width + 16;
+    let row_size: usize = start_width + 24;
     let row_count = 1900 / row_size;
 
     let mut table_rows = vec![];
