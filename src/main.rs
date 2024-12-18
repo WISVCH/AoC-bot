@@ -135,8 +135,7 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
         aoch_data
             .today
             .into_iter()
-            .enumerate()
-            .map(|i, x| {
+            .map(|x| {
                 let name: String = remove_emoji(&x.name.unwrap_or_else(|| ANON_USER.to_string()));
 
                 let mut stars: String = String::new();
@@ -151,7 +150,7 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
                     "{2:>4}) | {name:0$} | {stars:<5} | {1:>5}",
                     start_width,
                     x.score,
-                    i + 1
+                    x.rank
                 )
             })
             .collect::<Vec<String>>()
