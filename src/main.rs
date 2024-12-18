@@ -1,7 +1,7 @@
-use std::cmp;
 use demoji_rs::remove_emoji;
 use poise::serenity_prelude as serenity;
 use serde::Deserialize;
+use std::cmp;
 
 struct Data {} // User data, which is stored and accessible in all command invocations
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -121,13 +121,13 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
         })
         .max()
         .unwrap();
-    let row_size: usize = start_width + 16;
+    let row_size: usize = start_width + 24;
     let row_count = 1900 / row_size;
 
     let mut table_rows = vec![];
     table_rows.push(format!(
-        "{1:0$} | {2:5} | {3:5}",
-        start_width, "Name", "Stars", "Score"
+        "{4:5} | {1:0$} | {2:5} | {3:5}",
+        start_width, "Name", "Stars", "Score", "Rank"
     ));
     table_rows.push(format!("{:-^row_size$}", ""));
 
@@ -146,7 +146,10 @@ async fn leaderboard_today(ctx: Context<'_>) -> Result<(), Error> {
                     stars += "*";
                 }
 
-                format!("{name:0$} | {stars:^5} | {1:<5}", start_width, x.score)
+                format!(
+                    "{2:>4}) | {name:0$} | {stars:<5} | {1:>5}",
+                    start_width, x.score, x.rank
+                )
             })
             .collect::<Vec<String>>()
             .as_mut(),
